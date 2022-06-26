@@ -54,7 +54,7 @@ export const AntdList = styled(List)`
     .ant-list-item {
         background: white;
         border-radius: 10px;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
         padding-left: 5px;
         box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
     }
