@@ -4,7 +4,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { AntdAvatar, AntdButton, AntdCard, AntdHeader, AntdInput, AntdList } from './styled';
-import { Button, Col, Divider, Empty, Form, Layout, message, Popconfirm, Row, Spin, Typography } from 'antd';
+import { Col, Divider, Empty, Form, Layout, message, Popconfirm, Row, Spin, Typography } from 'antd';
 import { CloseOutlined, DeleteOutlined, HistoryOutlined, LoadingOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -247,7 +247,7 @@ function App() {
                     <AntdList.Item
                       actions={[
                         <Text type="secondary">{item.time}</Text>,
-                        <Button icon={<SearchOutlined />} shape="circle" type="dashed" onClick={() => searchFromHistory(item)} />,
+                        <AntdButton icon={<SearchOutlined />} shape="circle" type="primary" onClick={() => searchFromHistory(item)} />,
                         <Popconfirm
                           placement="topRight"
                           title="Are you sure to delete this record?"
@@ -255,7 +255,7 @@ function App() {
                           okText="Yes"
                           cancelText="No"
                         >
-                          <Button icon={<DeleteOutlined />} shape="circle" type="dashed" />
+                          <AntdButton icon={<DeleteOutlined />} shape="circle" type="danger" />
                         </Popconfirm>
                       ]}
                     >

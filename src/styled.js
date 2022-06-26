@@ -3,7 +3,9 @@ import { Avatar, Button, Card, Input, Layout, List } from "antd";
 const { Header } = Layout;
 
 const Colors = {
-    "primary": "#4b7cf3"
+    "primary": "#4b7cf3",
+    "primaryHover" : "#5e8cfb",
+    "primaryDisabled" : "#f5f5f5"
 };
 
 const BorderStyled = css`
@@ -11,8 +13,13 @@ const BorderStyled = css`
     border-radius: 16px; 
 `
 
+const BoxShadowStyled = css`
+    box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+`
+
 export const AntdAvatar = styled(Avatar)`
     background-color: white;
+    ${BoxShadowStyled};
 `
 
 export const AntdButton = styled(Button)`
@@ -21,12 +28,12 @@ export const AntdButton = styled(Button)`
         background: ${Colors.primary};
         border-color: ${Colors.primary};
         :hover {
-            background: #5e8cfb;
-            border-color: #5e8cfb;
+            background:  ${Colors.primaryHover};
+            border-color: ${Colors.primaryHover};
         }
         :disabled {
-            background: #f5f5f5;
-            border-color: #f5f5f5;
+            background: ${Colors.primaryDisabled};
+            border-color: ${Colors.primaryDisabled};
             color: rgba(0, 0, 0, 0.25);
         }
     }
@@ -34,8 +41,7 @@ export const AntdButton = styled(Button)`
 
 export const AntdCard = styled(Card)`
     border-radius: 20px;
-    box-shadow: 0 10px 10px 0 rgb(0 0 0 / 16%);
-    background: #f6f5fa;
+    ${BoxShadowStyled};
 `
 
 export const AntdHeader = styled(Header)`
@@ -56,7 +62,7 @@ export const AntdList = styled(List)`
         border-radius: 10px;
         margin-bottom: 10px;
         padding-left: 5px;
-        box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+        ${BoxShadowStyled};
     }
     .ant-list-item-meta {
         align-items: center;
