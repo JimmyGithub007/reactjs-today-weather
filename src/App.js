@@ -1,25 +1,234 @@
-import logo from './logo.svg';
 import './App.css';
+import 'antd/dist/antd.min.css';
+import axios from 'axios';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import { AntdAvatar, AntdButton, AntdCard, AntdHeader, AntdInput, AntdList } from './styled';
+import { Button, Col, Divider, Empty, Form, Layout, message, Popconfirm, Row, Spin, Typography } from 'antd';
+import { CloseOutlined, DeleteOutlined, HistoryOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { AnimatePresence, motion } from 'framer-motion';
+
+const { Text, Title } = Typography;
+const { Content } = Layout;
+//call from env - start
+const API_URL = process.env.REACT_APP_API_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+const ICON_URL = process.env.REACT_APP_ICON_URL;
+//call from env - end
+
+const defaultData = {
+  city: "",
+  country: "",
+  time: "",
+  weather: null
+}
+
+const variants = {
+  initial: {
+    y: -20, 
+    opacity: 0
+  },
+  animate: {
+    y: 0, 
+    opacity: 1,
+    transition: {
+      delay: 0.8,
+      duration: 0.5
+    }
+  },
+  exit: {
+    y: 20, opacity: 0
+  }
+}
+
+const SearchDataGrid = ({ title, value }) => (
+  <Row gutter={24} justify="space-between">
+    <Col xs={10} sm={10} md={8} lg={6}>
+      <b>{title}:</b>
+    </Col>
+    <Col sm={14} md={16} lg={18}>
+      {value}
+    </Col>
+  </Row>
+);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [data, setData] = useState(defaultData);
+
+  const fetchData = value => {
+    setLoading(true);
+    axios.get(`${API_URL}q=${value.city},${value.country}&appid=${API_KEY}`)
+      .then(response => {
+        setLoading(false);
+        const resp = response.data;
+        let arrHistory = history;
+        const respData = {
+          id: arrHistory.length > 0 ? arrHistory[0].id + 1 : 1,
+          city: resp.name,
+          country: resp.sys.country,
+          weather: {
+            main: resp.weather[0].main,
+            description: resp.weather[0].description,
+            humidity: resp.main.humidity + "%",
+            temp: resp.main.temp_min + "°C~" + resp.main.temp_max + "°C",
+            icon: resp.weather[0].icon
+          }
+        };
+        setData({ ...respData, time: moment().format("YYYY-MM-DD hh:mm A") });
+        arrHistory.unshift({ ...respData, time: moment().format("hh:mm:ss A") });
+        setHistory(arrHistory);
+        localStorage.setItem("History", JSON.stringify(arrHistory));
+      }).catch(error => {
+        setLoading(false);
+        setData(defaultData);
+        message.error(error.response.data.message);
+      })
+  }
+
+  //remove record from search history
+  const removeData = value => {
+    const filterHistory = history.filter(h => h.id !== value.id);
+    setHistory(filterHistory);
+    localStorage.setItem("History", JSON.stringify(filterHistory));
+  }
+
+  //clear the input field and search data
+  const clearData = () => {
+    form.setFieldsValue({
+      city: "",
+      country: ""
+    });
+    setData(defaultData);
+  }
+
+  const searchFromHistory = value => {
+    form.setFieldsValue({
+      city: value.city,
+      country: value.country
+    });
+    fetchData(value);
+  }
+
+  //initial get the history record from localStorage
+  useEffect(() => {
+    const lsHistory = localStorage.getItem("History");
+    if (lsHistory) {
+      setHistory(JSON.parse(lsHistory));
+    }
+  }, [])
+
+  return (<Layout className="App">
+    <AntdHeader>
+      <Row gutter={24} justify="center">
+        <Col xs={24} sm={22} style={{ maxWidth: "768px" }}>
+          Today's Weather
+        </Col>
+      </Row>
+    </AntdHeader>
+    <Content style={{ padding: "24px", minHeight: "calc(100vh - 64px)" }}>
+      <Row gutter={24} justify="center">
+        <Col xs={24} sm={22} style={{ maxWidth: "768px" }}>
+          <Form
+            form={form}
+            layout="horizontal"
+            onFinish={fetchData}
+          >
+            <Row gutter={24}>
+              <Col xs={24} sm={12} md={12} lg={8}>
+                <Form.Item
+                  name="city"
+                  rules={[{ required: true, message: "City is required!" }]}
+                >
+                  <AntdInput placeholder="City" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={12} lg={8}>
+                <Form.Item
+                  name="country"
+                  rules={[{ required: true, message: "Country is required!" }]}
+                >
+                  <AntdInput placeholder="Country" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={12} lg={8}>
+                <Row gutter={24}>
+                  <Col span={12}>
+                    <AntdButton block htmlType="submit" loading={loading} type="primary">{!loading && <SearchOutlined />} Search</AntdButton>
+                  </Col>
+                  <Col span={12}>
+                    <AntdButton block onClick={clearData}><CloseOutlined /> Clear</AntdButton>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </Form><br />
+          <Row gutter={24} justify="center">
+            <Col xs={24} sm={22} md={20} lg={18} xl={16} xxl={14} style={{height: "300px"}}>
+              <Spin spinning={loading}>
+                <AnimatePresence>
+                  {
+                    data.weather ?
+                      <motion.div key="result" {...variants}>
+                        <AntdCard title={data.city + ", " + data.country} extra={<AntdButton icon={<ReloadOutlined />} shape="circle" type="primary" onClick={() => fetchData(data)} />}>
+                          <Title>
+                            <AntdAvatar
+                              size={50}
+                              src={`${ICON_URL}${data.weather.icon}.png`}
+                            />
+                            {" " + data.weather.main}
+                          </Title>
+                          <SearchDataGrid title="Description" value={data.weather.description} />
+                          <SearchDataGrid title="Temperature" value={data.weather.temp} />
+                          <SearchDataGrid title="Humidity" value={data.weather.humidity} />
+                          <SearchDataGrid title="Time" value={data.time} />
+                        </AntdCard>
+                      </motion.div> :
+                      <motion.div key="no_result" {...variants}>
+                          <Empty description="Not Found" style={{paddingTop: "60px"}} />
+                      </motion.div>
+                  }
+                </AnimatePresence>
+              </Spin>
+            </Col>
+          </Row>
+          <Divider><HistoryOutlined /> Search History</Divider>
+          <AntdList
+            itemLayout="horizontal"
+            dataSource={history}
+            locale={{
+              emptyText: <Empty description="No Record" />
+            }}
+            renderItem={(item, key) => (
+              <AntdList.Item
+                key={key}
+                actions={[
+                  <Text type="secondary">{item.time}</Text>,
+                  <Button icon={<SearchOutlined />} shape="circle" type="dashed" onClick={() => searchFromHistory(item)} />,
+                  <Popconfirm
+                    placement="topRight"
+                    title="Are you sure to delete this record?"
+                    onConfirm={() => removeData(item)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button icon={<DeleteOutlined />} shape="circle" type="dashed" />
+                  </Popconfirm>
+                ]}
+              >
+                <AntdList.Item.Meta
+                  avatar={<AntdAvatar src={`${ICON_URL}${item.weather.icon}.png`} />}
+                  title={(key + 1) + ". " + item.city + "," + item.country}
+                />
+              </AntdList.Item>
+            )}
+          />
+        </Col>
+      </Row>
+    </Content>
+  </Layout>);
 }
 
 export default App;
