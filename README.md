@@ -3,10 +3,10 @@
 
 Today's weather is a simple app by calling openweathermap api using ReactJS & Ant Design
 
-Check the demo of the app here : [https://openweathermap.netlify.app/](https://jimmytodayweather.netlify.app/)
+Check the demo of the app here : [https://jimmytodayweather.netlify.app/](https://jimmytodayweather.netlify.app/)
 
 ## First clone the project
-### `$git clone https://github.com/JimmyGithub007/merquri-reactjs-today-weather.git`
+### `$git clone https://github.com/JimmyGithub007/reactjs-today-weather.git`
 
 Remember to pass your own openweathermap api key on .env file 
 
